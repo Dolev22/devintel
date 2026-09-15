@@ -374,3 +374,49 @@ class Source(Base):
     tags = Column(String(512), nullable=True)   # comma separated
     body = Column(Text, nullable=True)          # short in-app explainer
     order_index = Column(Integer, default=0, nullable=False)
+
+
+MEETING_STATUSES = ("scheduled", "cancelled")
+
+
+class ScheduledMeeting(Base):
+    """An internally-scheduled Code Review / Code Discussion meeting.
+
+    Always owned by a user and (usually) anchored to the repository a
+    Finding or Report belongs to, so the Code Review Calendar can show real
+    DevIntel context alongside the meeting. Purely internal — no external
+    calendar or social platform is involved.
+    """
+
+    __tablename__ = "scheduled_meetings"
+
+    id = Column(String(36), primary_key=True, default=new_id)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+    repository_id = Column(
+        String(36), ForeignKey("repositories.id"), nullable=True, index=True
+    )
+    finding_id = Column(String(36), ForeignKey("findings.id"), nullable=True, index=True)
+    report_id = Column(String(36), ForeignKey("reports.id"), nullable=True, index=True)
+
+    title = Column(String(255), nullable=False)
+
+    # `scheduled_at` is the authoritative UTC instant (used for ordering and
+    # calendar range queries). `timezone` is the IANA name the user picked
+    # when scheduling; the frontend re-renders `scheduled_at` in that zone so
+    # the meeting always displays at the wall-clock time it was booked for,
+    # regardless of the viewer's own browser timezone.
+    scheduled_at = Column(DateTime(timezone=True), nullable=False, index=True)
+    timezone = Column(String(64), nullable=False, default="UTC")
+
+    participants = Column(String(1024), nullable=True)  # comma separated names/emails
+    notes = Column(Text, nullable=True)
+
+    status = Column(String(16), default="scheduled", nullable=False, index=True)
+
+    created_at = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
+
+    user = relationship("User")
+    repository = relationship("Repository")
+    finding = relationship("Finding")
+    report = relationship("Report")

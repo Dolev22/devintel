@@ -6,6 +6,7 @@ import { useApp } from "./context/AppContext";
 import AnalysisRunDetail from "./pages/AnalysisRunDetail";
 import AnalysisRuns from "./pages/AnalysisRuns";
 import CodeReview from "./pages/CodeReview";
+import CodeReviewCalendar from "./pages/CodeReviewCalendar";
 import Dashboard from "./pages/Dashboard";
 import InsightDetail from "./pages/InsightDetail";
 import Insights from "./pages/Insights";
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="runs/:analysisId" element={<AnalysisRunDetail />} />
           <Route path="reports" element={<Reports />} />
           <Route path="reports/:reportId" element={<ReportDetail />} />
+          <Route path="calendar" element={<CodeReviewCalendar />} />
           <Route path="knowledge" element={<Knowledge />} />
           <Route path="settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" replace />} />

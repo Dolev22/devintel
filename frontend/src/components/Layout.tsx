@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { to: "/insights", label: "Developer Insights", icon: Icon.Insight, badge: true },
   { to: "/runs", label: "Analysis Runs", icon: Icon.Runs },
   { to: "/reports", label: "Reports", icon: Icon.Report },
+  { to: "/calendar", label: "Code Review Calendar", icon: Icon.Calendar },
 ];
 
 const SECONDARY_ITEMS = [
@@ -55,6 +56,11 @@ const PAGE_META: { match: RegExp; title: string; subtitle: string }[] = [
     subtitle: "Consolidated intelligence for one analysis",
   },
   { match: /^\/reports/, title: "Reports", subtitle: "Developer-facing intelligence reports" },
+  {
+    match: /^\/calendar/,
+    title: "Code Review Calendar",
+    subtitle: "Scheduled Code Review meetings around your insights and reports",
+  },
   {
     match: /^\/knowledge/,
     title: "Knowledge",

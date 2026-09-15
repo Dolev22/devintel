@@ -1,12 +1,26 @@
 from __future__ import annotations
 
 import json
+from datetime import date as date_cls
 from datetime import datetime
+from datetime import time as time_cls
 from typing import Any, Literal
+from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.models import Analysis, AgentRun, Feedback, Finding, Report, Repository, RepositoryFile, Source, User
+from app.models import (
+    Analysis,
+    AgentRun,
+    Feedback,
+    Finding,
+    Report,
+    Repository,
+    RepositoryFile,
+    ScheduledMeeting,
+    Source,
+    User,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -64,6 +78,74 @@ class PreferencesUpdateRequest(BaseModel):
     notify_on_complete: bool | None = None
     notify_on_critical: bool | None = None
     notify_weekly_digest: bool | None = None
+
+
+def _check_date(value: str | None) -> str | None:
+    if value is None:
+        return value
+    try:
+        date_cls.fromisoformat(value)
+    except ValueError as exc:
+        raise ValueError("date must be in YYYY-MM-DD format") from exc
+    return value
+
+
+def _check_time(value: str | None) -> str | None:
+    if value is None:
+        return value
+    try:
+        time_cls.fromisoformat(value)
+    except ValueError as exc:
+        raise ValueError("time must be in HH:MM format") from exc
+    return value
+
+
+def _check_timezone(value: str | None) -> str | None:
+    if value is None:
+        return value
+    try:
+        ZoneInfo(value)
+    except Exception as exc:
+        raise ValueError(f"Unknown timezone: {value}") from exc
+    return value
+
+
+def _blank_to_none(value: str | None) -> str | None:
+    if value is None:
+        return None
+    return value.strip() or None
+
+
+class MeetingCreateRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=255)
+    repository_id: str | None = None
+    finding_id: str | None = None
+    report_id: str | None = None
+    date: str
+    time: str
+    timezone: str = "UTC"
+    participants: str | None = Field(default=None, max_length=1024)
+    notes: str | None = Field(default=None, max_length=4000)
+
+    _v_repo = field_validator("repository_id")(_blank_to_none)
+    _v_finding = field_validator("finding_id")(_blank_to_none)
+    _v_report = field_validator("report_id")(_blank_to_none)
+    _v_date = field_validator("date")(_check_date)
+    _v_time = field_validator("time")(_check_time)
+    _v_tz = field_validator("timezone")(_check_timezone)
+
+
+class MeetingUpdateRequest(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    date: str | None = None
+    time: str | None = None
+    timezone: str | None = None
+    participants: str | None = Field(default=None, max_length=1024)
+    notes: str | None = Field(default=None, max_length=4000)
+
+    _v_date = field_validator("date")(_check_date)
+    _v_time = field_validator("time")(_check_time)
+    _v_tz = field_validator("timezone")(_check_timezone)
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -298,6 +380,31 @@ def serialize_file_detail(file: RepositoryFile, findings: list[Finding]) -> dict
         "is_test": file.is_test,
         "content": file.content,
         "findings": [serialize_finding(f) for f in findings],
+    }
+
+
+def serialize_meeting(
+    meeting: ScheduledMeeting,
+    repository: Repository | None = None,
+    finding: Finding | None = None,
+    report: Report | None = None,
+) -> dict:
+    return {
+        "id": meeting.id,
+        "title": meeting.title,
+        "repository_id": meeting.repository_id,
+        "repository_name": repository.name if repository else None,
+        "finding_id": meeting.finding_id,
+        "finding_title": finding.title if finding else None,
+        "report_id": meeting.report_id,
+        "report_title": report.title if report else None,
+        "scheduled_at": _iso(meeting.scheduled_at),
+        "timezone": meeting.timezone,
+        "participants": meeting.participants,
+        "notes": meeting.notes,
+        "status": meeting.status,
+        "created_at": _iso(meeting.created_at),
+        "updated_at": _iso(meeting.updated_at),
     }
 
 

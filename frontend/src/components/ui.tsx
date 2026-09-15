@@ -208,6 +208,15 @@ export const Icon = {
       <circle cx="17" cy="7" r="1" fill="currentColor" stroke="none" />
     </svg>
   ),
+  Calendar: ({ size = 18, className }: IconProps) => (
+    <svg {...base(size)} className={className}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 9.5h18M8 3v4M16 3v4" />
+      <circle cx="8" cy="14" r="1" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="14" r="1" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="14" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  ),
   LinkedIn: ({ size = 18, className }: IconProps) => (
     <svg {...base(size)} className={className}>
       <rect x="3" y="3" width="18" height="18" rx="4" />

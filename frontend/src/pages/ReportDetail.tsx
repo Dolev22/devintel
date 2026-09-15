@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import InsightRow from "../components/InsightRow";
 import LinkedInShareModal from "../components/LinkedInShareModal";
 import Pipeline from "../components/Pipeline";
+import ScheduleMeetingModal from "../components/ScheduleMeetingModal";
 import {
   BarRow,
   EmptyState,
@@ -33,6 +34,7 @@ export default function ReportDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLinkedIn, setShowLinkedIn] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   const load = useCallback(async () => {
     if (!reportId) return;
@@ -112,6 +114,9 @@ export default function ReportDetail() {
             <button className="btn btn-sm" onClick={() => setShowLinkedIn(true)}>
               <Icon.External size={13} /> Share to LinkedIn
             </button>
+            <button className="btn btn-sm" onClick={() => setShowSchedule(true)}>
+              <Icon.Calendar size={13} /> Schedule Code Review
+            </button>
           </div>
         </div>
       </div>
@@ -121,6 +126,16 @@ export default function ReportDetail() {
           sourceType="report"
           source={report}
           onClose={() => setShowLinkedIn(false)}
+        />
+      )}
+
+      {showSchedule && (
+        <ScheduleMeetingModal
+          mode="create"
+          sourceType="report"
+          source={report}
+          onClose={() => setShowSchedule(false)}
+          onSaved={() => setShowSchedule(false)}
         />
       )}
 

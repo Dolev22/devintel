@@ -7,7 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import analyses, auth, repositories, workspace
+from app.api import analyses, auth, meetings, repositories, workspace
 from app.config import settings
 from app.db.seed import run_seed
 from app.db.session import init_db
@@ -50,6 +50,7 @@ app.include_router(auth.router)
 app.include_router(repositories.router)
 app.include_router(analyses.router)
 app.include_router(workspace.router)
+app.include_router(meetings.router)
 
 
 @app.exception_handler(Exception)

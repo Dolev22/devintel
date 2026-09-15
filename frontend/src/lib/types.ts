@@ -249,6 +249,26 @@ export interface FindingDetailResponse {
   analysis: Analysis | null;
 }
 
+export type MeetingStatus = "scheduled" | "cancelled";
+
+export interface Meeting {
+  id: string;
+  title: string;
+  repository_id: string | null;
+  repository_name: string | null;
+  finding_id: string | null;
+  finding_title: string | null;
+  report_id: string | null;
+  report_title: string | null;
+  scheduled_at: string;
+  timezone: string;
+  participants: string | null;
+  notes: string | null;
+  status: MeetingStatus;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 export interface SystemInfo {
   llm_enabled: boolean;
   llm_model: string | null;

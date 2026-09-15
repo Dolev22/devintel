@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import CodeViewer from "../components/CodeViewer";
 import FeedbackDialog from "../components/FeedbackDialog";
 import LinkedInShareModal from "../components/LinkedInShareModal";
+import ScheduleMeetingModal from "../components/ScheduleMeetingModal";
 import {
   AgentBadge,
   ConfidenceMeter,
@@ -46,6 +47,7 @@ export default function InsightDetail() {
   const [saving, setSaving] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showLinkedIn, setShowLinkedIn] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   const load = useCallback(async () => {
     if (!findingId) return;
@@ -157,6 +159,9 @@ export default function InsightDetail() {
             )}
             <button className="btn btn-sm" onClick={() => setShowLinkedIn(true)}>
               <Icon.External size={13} /> Share to LinkedIn
+            </button>
+            <button className="btn btn-sm" onClick={() => setShowSchedule(true)}>
+              <Icon.Calendar size={13} /> Schedule Code Review
             </button>
           </div>
         </div>
@@ -532,6 +537,16 @@ export default function InsightDetail() {
           sourceType="finding"
           source={finding}
           onClose={() => setShowLinkedIn(false)}
+        />
+      )}
+
+      {showSchedule && (
+        <ScheduleMeetingModal
+          mode="create"
+          sourceType="finding"
+          source={finding}
+          onClose={() => setShowSchedule(false)}
+          onSaved={() => setShowSchedule(false)}
         />
       )}
     </div>

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import CodeViewer from "../components/CodeViewer";
 import FeedbackDialog from "../components/FeedbackDialog";
+import LinkedInShareModal from "../components/LinkedInShareModal";
 import {
   AgentBadge,
   ConfidenceMeter,
@@ -44,6 +45,7 @@ export default function InsightDetail() {
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showLinkedIn, setShowLinkedIn] = useState(false);
 
   const load = useCallback(async () => {
     if (!findingId) return;
@@ -134,12 +136,14 @@ export default function InsightDetail() {
             {finding.description}
           </p>
 
-          {finding.file_path && (
-            <div className="row row-wrap" style={{ gap: 10, marginBlockStart: 14 }}>
+          <div className="row row-wrap" style={{ gap: 10, marginBlockStart: 14 }}>
+            {finding.file_path && (
               <span className="insight-location">
                 {finding.file_path}
                 {finding.line_number ? `:${finding.line_number}` : ""}
               </span>
+            )}
+            {finding.file_path && (
               <button
                 className="btn btn-sm"
                 onClick={() =>
@@ -150,8 +154,11 @@ export default function InsightDetail() {
               >
                 <Icon.Code size={13} /> Open in code review
               </button>
-            </div>
-          )}
+            )}
+            <button className="btn btn-sm" onClick={() => setShowLinkedIn(true)}>
+              <Icon.External size={13} /> Share to LinkedIn
+            </button>
+          </div>
         </div>
       </div>
 
@@ -517,6 +524,14 @@ export default function InsightDetail() {
             setData({ ...data, finding: updatedFinding });
             setShowFeedback(false);
           }}
+        />
+      )}
+
+      {showLinkedIn && (
+        <LinkedInShareModal
+          sourceType="finding"
+          source={finding}
+          onClose={() => setShowLinkedIn(false)}
         />
       )}
     </div>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import InsightRow from "../components/InsightRow";
+import LinkedInShareModal from "../components/LinkedInShareModal";
 import Pipeline from "../components/Pipeline";
 import {
   BarRow,
@@ -31,6 +32,7 @@ export default function ReportDetail() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showLinkedIn, setShowLinkedIn] = useState(false);
 
   const load = useCallback(async () => {
     if (!reportId) return;
@@ -107,9 +109,20 @@ export default function ReportDetail() {
             >
               <Icon.Code size={13} /> Code review
             </button>
+            <button className="btn btn-sm" onClick={() => setShowLinkedIn(true)}>
+              <Icon.External size={13} /> Share to LinkedIn
+            </button>
           </div>
         </div>
       </div>
+
+      {showLinkedIn && (
+        <LinkedInShareModal
+          sourceType="report"
+          source={report}
+          onClose={() => setShowLinkedIn(false)}
+        />
+      )}
 
       <div className="card">
         <div className="card-header">

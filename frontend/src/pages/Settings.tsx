@@ -4,7 +4,19 @@ import { ErrorState, Icon, LoadingState } from "../components/ui";
 import { useApp } from "../context/AppContext";
 import { api, ApiError } from "../lib/api";
 import { SEVERITY_LABEL, SEVERITY_ORDER } from "../lib/format";
+import {
+  LINKEDIN_VS_INSTAGRAM_TONE,
+  SOCIAL_PLATFORMS,
+  isLinkedInConnected,
+  setLinkedInConnected,
+} from "../lib/linkedin";
 import type { Preferences, SystemInfo } from "../lib/types";
+
+function PlatformSupportBadge({ support }: { support: "primary" | "available" | "unsupported" }) {
+  if (support === "primary") return <span className="badge badge-success">Supported</span>;
+  if (support === "available") return <span className="badge badge-neutral">Not integrated</span>;
+  return <span className="badge badge-danger">Not supported</span>;
+}
 
 function Toggle({
   label,
@@ -46,6 +58,7 @@ export default function Settings() {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" });
   const [savingProfile, setSavingProfile] = useState(false);
+  const [linkedinConnected, setLinkedinConnectedState] = useState(isLinkedInConnected());
 
   const load = useCallback(async () => {
     try {
@@ -78,6 +91,18 @@ export default function Settings() {
       notify(err instanceof ApiError ? err.message : "Could not save preference.", "error");
       load();
     }
+  }
+
+  function toggleLinkedIn() {
+    const next = !linkedinConnected;
+    setLinkedInConnected(next);
+    setLinkedinConnectedState(next);
+    notify(
+      next
+        ? "LinkedIn connected (demo) — no real account is linked."
+        : "LinkedIn disconnected (demo).",
+      next ? "success" : "info"
+    );
   }
 
   async function saveProfile() {
@@ -298,6 +323,84 @@ export default function Settings() {
             value={local.notify_weekly_digest}
             onChange={(value) => patch({ notify_weekly_digest: value })}
           />
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h2>Social Platforms</h2>
+          <span className="badge badge-neutral card-header-action">LinkedIn is primary</span>
+        </div>
+        <div className="card-pad stack" style={{ gap: 0 }}>
+          <p className="text-sm text-muted" style={{ marginBlockStart: 0 }}>
+            DevIntel can turn a real Developer Insight or Report into a professional
+            LinkedIn post draft. Other platforms are shown for context only.
+          </p>
+
+          {SOCIAL_PLATFORMS.map((platform) => (
+            <div
+              key={platform.id}
+              className="row"
+              style={{
+                gap: 12,
+                padding: "13px 0",
+                borderBlockEnd: "1px dashed var(--border)",
+                alignItems: "flex-start",
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="row" style={{ gap: 8 }}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{platform.name}</span>
+                  <PlatformSupportBadge support={platform.support} />
+                  {platform.id === "linkedin" && (
+                    <span className={`badge ${linkedinConnected ? "badge-success" : "badge-neutral"}`}>
+                      {linkedinConnected ? "Connected (demo)" : "Not connected"}
+                    </span>
+                  )}
+                  <span className="badge badge-neutral mono">{platform.ratio}</span>
+                </div>
+                <div className="field-hint" style={{ marginBlockStart: 4 }}>
+                  {platform.note}
+                </div>
+              </div>
+
+              {platform.id === "linkedin" && (
+                <button
+                  className={`btn btn-sm ${linkedinConnected ? "" : "btn-primary"}`}
+                  onClick={toggleLinkedIn}
+                  style={{ flexShrink: 0 }}
+                >
+                  {linkedinConnected ? "Disconnect" : "Connect LinkedIn"}
+                </button>
+              )}
+            </div>
+          ))}
+
+          <div
+            className="row"
+            style={{
+              gap: 10,
+              marginBlockStart: 14,
+              padding: 12,
+              background: "var(--surface-2)",
+              borderRadius: "var(--radius-sm)",
+              border: "1px dashed var(--border-strong)",
+            }}
+          >
+            <Icon.Shield size={16} className="text-subtle" />
+            <span className="text-xs text-muted">
+              <strong>This is a demo connection, not a real LinkedIn account link.</strong> No
+              LinkedIn Developer App is configured in this environment. A real connection
+              would require: a registered LinkedIn app, its Client ID and Client Secret,
+              an approved OAuth 2.0 redirect URI, and the <code>w_member_social</code> (and{" "}
+              <code>openid profile email</code>) scopes granted by LinkedIn — none of which
+              are invented or faked here.
+            </span>
+          </div>
+
+          <p className="text-xs text-subtle" style={{ marginBlockEnd: 0, marginBlockStart: 10 }}>
+            {LINKEDIN_VS_INSTAGRAM_TONE}
+          </p>
         </div>
       </div>
 

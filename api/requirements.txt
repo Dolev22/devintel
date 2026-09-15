@@ -1,0 +1,13 @@
+# Mirrors backend/requirements.txt. Vercel's Python runtime looks for
+# requirements.txt at the project root or next to the api/ entry point, not in
+# backend/ — this copy exists only so Vercel can install the same
+# dependencies. Keep in sync with backend/requirements.txt.
+fastapi>=0.115
+uvicorn[standard]>=0.32
+sqlalchemy>=2.0
+pydantic>=2.9
+python-dotenv>=1.0
+PyJWT>=2.9
+httpx>=0.27
+anthropic>=0.40
+psycopg[binary]>=3.1

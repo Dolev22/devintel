@@ -3,20 +3,22 @@ import { useCallback, useEffect, useState } from "react";
 import { ErrorState, Icon, LoadingState } from "../components/ui";
 import { useApp } from "../context/AppContext";
 import { api, ApiError } from "../lib/api";
-import { SEVERITY_LABEL, SEVERITY_ORDER } from "../lib/format";
+import { SEVERITY_LABEL, SEVERITY_ORDER, formatDateTime } from "../lib/format";
+import { LINKEDIN_VS_INSTAGRAM_TONE } from "../lib/linkedin";
 import {
-  LINKEDIN_VS_INSTAGRAM_TONE,
-  SOCIAL_PLATFORMS,
-  isLinkedInConnected,
-  setLinkedInConnected,
-} from "../lib/linkedin";
+  SOCIAL_ACCOUNTS,
+  loadAccountStates,
+  setAccountConnected,
+  syncAllAccountsDemo,
+  type SocialAccountId,
+} from "../lib/socialAccounts";
 import type { Preferences, SystemInfo } from "../lib/types";
 
-function PlatformSupportBadge({ support }: { support: "primary" | "available" | "unsupported" }) {
-  if (support === "primary") return <span className="badge badge-success">Supported</span>;
-  if (support === "available") return <span className="badge badge-neutral">Not integrated</span>;
-  return <span className="badge badge-danger">Not supported</span>;
-}
+const PLATFORM_ICON: Record<SocialAccountId, (props: { size?: number; className?: string }) => JSX.Element> = {
+  facebook: Icon.Facebook,
+  instagram: Icon.Instagram,
+  linkedin: Icon.LinkedIn,
+};
 
 function Toggle({
   label,
@@ -58,7 +60,8 @@ export default function Settings() {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState({ name: user?.name || "", email: user?.email || "" });
   const [savingProfile, setSavingProfile] = useState(false);
-  const [linkedinConnected, setLinkedinConnectedState] = useState(isLinkedInConnected());
+  const [accountStates, setAccountStates] = useState(loadAccountStates());
+  const [syncing, setSyncing] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -93,16 +96,31 @@ export default function Settings() {
     }
   }
 
-  function toggleLinkedIn() {
-    const next = !linkedinConnected;
-    setLinkedInConnected(next);
-    setLinkedinConnectedState(next);
-    notify(
-      next
-        ? "LinkedIn connected (demo) — no real account is linked."
-        : "LinkedIn disconnected (demo).",
-      next ? "success" : "info"
-    );
+  function connectAccount(id: SocialAccountId, name: string, loginUrl: string) {
+    // Plain navigation only — opens the platform's real login page. No OAuth,
+    // no password/token/cookie is requested, collected, or stored by DevIntel.
+    window.open(loginUrl, "_blank", "noopener,noreferrer");
+    setAccountStates(setAccountConnected(id, true));
+    notify(`${name} marked as demo-connected — no real account is linked.`, "success");
+  }
+
+  function disconnectAccount(id: SocialAccountId, name: string) {
+    setAccountStates(setAccountConnected(id, false));
+    notify(`${name} disconnected (demo).`, "info");
+  }
+
+  function syncAccounts() {
+    setSyncing(true);
+    // Simulated sync only — no request is sent to Blotato or any other
+    // external social-media provider.
+    setTimeout(() => {
+      setAccountStates(syncAllAccountsDemo());
+      setSyncing(false);
+      notify(
+        "Demo sync complete — 3 accounts synchronized. No real Blotato/API call was made.",
+        "success"
+      );
+    }, 1200);
   }
 
   async function saveProfile() {
@@ -328,53 +346,93 @@ export default function Settings() {
 
       <div className="card">
         <div className="card-header">
-          <h2>Social Platforms</h2>
-          <span className="badge badge-neutral card-header-action">LinkedIn is primary</span>
+          <h2>Social Accounts</h2>
+          <button className="btn btn-sm btn-primary card-header-action" onClick={syncAccounts} disabled={syncing}>
+            {syncing ? <span className="spinner" /> : <Icon.Refresh size={13} />}
+            {syncing ? "Syncing…" : "Sync Accounts"}
+          </button>
         </div>
         <div className="card-pad stack" style={{ gap: 0 }}>
           <p className="text-sm text-muted" style={{ marginBlockStart: 0 }}>
-            DevIntel can turn a real Developer Insight or Report into a professional
-            LinkedIn post draft. Other platforms are shown for context only.
+            DevIntel can turn a real Developer Insight or Report into a professional LinkedIn
+            post draft. Facebook and Instagram are shown here as demo account slots for the
+            same workflow. <strong>None of these are real account connections</strong> — see
+            the notice below.
           </p>
 
-          {SOCIAL_PLATFORMS.map((platform) => (
-            <div
-              key={platform.id}
-              className="row row-wrap"
-              style={{
-                gap: 12,
-                padding: "13px 0",
-                borderBlockEnd: "1px dashed var(--border)",
-                alignItems: "flex-start",
-              }}
-            >
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <div className="row row-wrap" style={{ gap: 8 }}>
-                  <span style={{ fontWeight: 600, fontSize: 13 }}>{platform.name}</span>
-                  <PlatformSupportBadge support={platform.support} />
-                  {platform.id === "linkedin" && (
-                    <span className={`badge ${linkedinConnected ? "badge-success" : "badge-neutral"}`}>
-                      {linkedinConnected ? "Connected (demo)" : "Not connected"}
-                    </span>
-                  )}
-                  <span className="badge badge-neutral mono">{platform.ratio}</span>
+          {SOCIAL_ACCOUNTS.map((platform) => {
+            const state = accountStates[platform.id];
+            const PlatformIcon = PLATFORM_ICON[platform.id];
+            return (
+              <div
+                key={platform.id}
+                className="row row-wrap"
+                style={{
+                  gap: 12,
+                  padding: "14px 0",
+                  borderBlockEnd: "1px dashed var(--border)",
+                  alignItems: "flex-start",
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "var(--radius-sm)",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <PlatformIcon size={18} />
                 </div>
-                <div className="field-hint" style={{ marginBlockStart: 4 }}>
-                  {platform.note}
+
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <div className="row row-wrap" style={{ gap: 8 }}>
+                    <span style={{ fontWeight: 600, fontSize: 13 }}>{platform.name}</span>
+                    <span className={`badge ${state.connected ? "badge-success" : "badge-neutral"}`}>
+                      {state.connected ? "Demo Connected" : "Not connected"}
+                    </span>
+                    <span className="badge badge-neutral mono">{platform.ratio}</span>
+                  </div>
+                  <div className="field-hint" style={{ marginBlockStart: 4 }}>
+                    {state.lastSyncedAt
+                      ? `Last synced ${formatDateTime(state.lastSyncedAt)} (demo)`
+                      : "Not synced yet"}
+                  </div>
+                </div>
+
+                <div className="row" style={{ gap: 8, flexShrink: 0 }}>
+                  <a
+                    className="btn btn-sm"
+                    href={platform.homeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Icon.External size={12} /> Open platform
+                  </a>
+                  {state.connected ? (
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => disconnectAccount(platform.id, platform.name)}
+                    >
+                      Disconnect
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={() => connectAccount(platform.id, platform.name, platform.loginUrl)}
+                    >
+                      Open Login
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {platform.id === "linkedin" && (
-                <button
-                  className={`btn btn-sm ${linkedinConnected ? "" : "btn-primary"}`}
-                  onClick={toggleLinkedIn}
-                  style={{ flexShrink: 0 }}
-                >
-                  {linkedinConnected ? "Disconnect" : "Connect LinkedIn"}
-                </button>
-              )}
-            </div>
-          ))}
+            );
+          })}
 
           <div
             className="row"
@@ -389,12 +447,36 @@ export default function Settings() {
           >
             <Icon.Shield size={16} className="text-subtle" />
             <span className="text-xs text-muted">
-              <strong>This is a demo connection, not a real LinkedIn account link.</strong> No
-              LinkedIn Developer App is configured in this environment. A real connection
-              would require: a registered LinkedIn app, its Client ID and Client Secret,
-              an approved OAuth 2.0 redirect URI, and the <code>w_member_social</code> (and{" "}
-              <code>openid profile email</code>) scopes granted by LinkedIn — none of which
-              are invented or faked here.
+              <strong>These are demo connections, not real account links.</strong> "Open Login"
+              only opens that platform's own official login page in a new tab — plain
+              navigation, not OAuth. DevIntel never requests, collects, stores, or exposes a
+              password, access token, API key, cookie, or client secret for any of these
+              platforms. "Sync Accounts" simulates a sync from an external provider (such as
+              Blotato) with a short fake delay — no real API call is made. This demo state is
+              stored only in your own browser, never on DevIntel's server or shared with other
+              visitors of this public deployment.
+            </span>
+          </div>
+
+          <div
+            className="row"
+            style={{
+              gap: 10,
+              marginBlockStart: 10,
+              padding: 12,
+              background: "var(--surface-2)",
+              borderRadius: "var(--radius-sm)",
+              border: "1px dashed var(--border-strong)",
+            }}
+          >
+            <Icon.Shield size={16} className="text-subtle" />
+            <span className="text-xs text-muted">
+              A real LinkedIn connection would require a registered LinkedIn Developer App:
+              its Client ID and Client Secret, an approved OAuth 2.0 redirect URI, and the{" "}
+              <code>w_member_social</code> (and <code>openid profile email</code>) scopes
+              granted by LinkedIn — none of which exist in this environment or are faked here.
+              TikTok is intentionally not offered: DevIntel produces technical developer
+              insights and reports, not short-form video/entertainment content.
             </span>
           </div>
 

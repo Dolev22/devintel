@@ -191,6 +191,30 @@ export const Icon = {
       <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" />
     </svg>
   ),
+  Facebook: ({ size = 18, className }: IconProps) => (
+    <svg {...base(size)} className={className}>
+      <rect x="3" y="3" width="18" height="18" rx="4" />
+      <path
+        d="M13.5 21v-6.5H16l.5-3h-3V9.3c0-.9.3-1.5 1.6-1.5H16.6V5.2C16.2 5.1 15.3 5 14.3 5c-2.1 0-3.6 1.3-3.6 3.7v2.1H8.2v3h2.5V21"
+        fill="currentColor"
+        stroke="none"
+      />
+    </svg>
+  ),
+  Instagram: ({ size = 18, className }: IconProps) => (
+    <svg {...base(size)} className={className}>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17" cy="7" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  LinkedIn: ({ size = 18, className }: IconProps) => (
+    <svg {...base(size)} className={className}>
+      <rect x="3" y="3" width="18" height="18" rx="4" />
+      <circle cx="8" cy="8.2" r="1.3" fill="currentColor" stroke="none" />
+      <path d="M8 11v6M12.2 17v-3.8a2.2 2.2 0 0 1 4.4 0V17M12.2 11.3V17" />
+    </svg>
+  ),
 };
 
 /* ----------------------------------------------------------------- badges */

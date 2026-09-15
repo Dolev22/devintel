@@ -11,65 +11,8 @@
 
 import type { Finding, Report } from "./types";
 
-export type PlatformSupport = "primary" | "available" | "unsupported";
-
-export interface SocialPlatform {
-  id: "linkedin" | "instagram" | "tiktok";
-  name: string;
-  ratio: string;
-  support: PlatformSupport;
-  note: string;
-}
-
-export const SOCIAL_PLATFORMS: SocialPlatform[] = [
-  {
-    id: "linkedin",
-    name: "LinkedIn",
-    ratio: "1.91:1",
-    support: "primary",
-    note:
-      "Primary integration. DevIntel turns a real Developer Insight or Report into a professional, text-first post draft.",
-  },
-  {
-    id: "instagram",
-    name: "Instagram",
-    ratio: "1:1",
-    support: "available",
-    note:
-      "Shown for completeness only — not the focus of this integration. DevIntel's output (technical findings and reports) isn't a natural fit for Instagram's visual-first format, so no draft generator or publishing is implemented for it.",
-  },
-  {
-    id: "tiktok",
-    name: "TikTok",
-    ratio: "9:16",
-    support: "unsupported",
-    note:
-      "Not supported by design. DevIntel produces technical developer insights and reports, not short-form video/entertainment content, so TikTok publishing is out of scope for this product.",
-  },
-];
-
 export const LINKEDIN_VS_INSTAGRAM_TONE =
   "LinkedIn favors a professional, text-first, educational tone aimed at other developers and engineering peers, while Instagram favors a casual, highly visual, entertainment-oriented tone aimed at broad consumer audiences.";
-
-const CONNECTED_KEY = "devintel_linkedin_connected_demo";
-
-/** Demo-only "connection" flag, stored per-browser. Never a real OAuth session. */
-export function isLinkedInConnected(): boolean {
-  try {
-    return localStorage.getItem(CONNECTED_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
-export function setLinkedInConnected(connected: boolean) {
-  try {
-    if (connected) localStorage.setItem(CONNECTED_KEY, "true");
-    else localStorage.removeItem(CONNECTED_KEY);
-  } catch {
-    /* storage unavailable — connection state just won't persist across reloads */
-  }
-}
 
 function cta(): string {
   return "Curious how automated multi-agent code review works? Follow along as DevIntel analyzes more repositories.";

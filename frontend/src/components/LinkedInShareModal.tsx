@@ -1,11 +1,8 @@
 import { useMemo, useState } from "react";
 
 import { useApp } from "../context/AppContext";
-import {
-  draftFromFinding,
-  draftFromReport,
-  isLinkedInConnected,
-} from "../lib/linkedin";
+import { draftFromFinding, draftFromReport } from "../lib/linkedin";
+import { loadAccountStates } from "../lib/socialAccounts";
 import type { Finding, Report } from "../lib/types";
 import { Icon, Modal } from "./ui";
 
@@ -15,7 +12,7 @@ type Props =
 
 export default function LinkedInShareModal({ sourceType, source, onClose }: Props) {
   const { notify } = useApp();
-  const connected = isLinkedInConnected();
+  const connected = loadAccountStates().linkedin.connected;
 
   const initialDraft = useMemo(
     () =>

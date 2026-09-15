@@ -340,7 +340,7 @@ export default function Settings() {
           {SOCIAL_PLATFORMS.map((platform) => (
             <div
               key={platform.id}
-              className="row"
+              className="row row-wrap"
               style={{
                 gap: 12,
                 padding: "13px 0",
@@ -348,8 +348,8 @@ export default function Settings() {
                 alignItems: "flex-start",
               }}
             >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="row" style={{ gap: 8 }}>
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <div className="row row-wrap" style={{ gap: 8 }}>
                   <span style={{ fontWeight: 600, fontSize: 13 }}>{platform.name}</span>
                   <PlatformSupportBadge support={platform.support} />
                   {platform.id === "linkedin" && (

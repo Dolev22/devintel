@@ -134,6 +134,15 @@ export default function Login() {
           </button>
         </form>
 
+        <button
+          className="btn"
+          type="button"
+          title="Explore with sample data — no account needed"
+          onClick={() => window.location.assign("/demo")}
+        >
+          Enter Demo
+        </button>
+
         {demo && mode === "login" && (
           <div className="auth-hint">
             <strong style={{ color: "var(--text)" }}>Demo account</strong> — the fields are

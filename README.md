@@ -5,6 +5,18 @@ developer intelligence report covering **bug detection**, **code quality** and *
 
 This is the MVP implementation of the approved architecture plan.
 
+**[Live Demo](https://devintel-eight.vercel.app/demo)** — opens directly in the browser, no sign-in or setup.
+
+> **About the demo.** The original application is designed to work with the real
+> backend/Supabase infrastructure. The public portfolio demo is an isolated
+> browser-based version using mock/local data so recruiters can explore it without
+> credentials or external services.
+>
+> | | Data and services |
+> |---|---|
+> | DevIntel (the application) | FastAPI backend, Supabase Postgres, real analysis pipeline |
+> | DevIntel Demo (`/demo`) | Mock data stored in the browser only; analyses are simulated |
+
 ---
 
 ## Running it

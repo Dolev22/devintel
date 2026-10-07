@@ -85,6 +85,8 @@ export default function App() {
           <Route path="calendar" element={<CodeReviewCalendar />} />
           <Route path="knowledge" element={<Knowledge />} />
           <Route path="settings" element={<Settings />} />
+          {/* Portfolio demo entry: lib/demo.ts switches demo mode on for this URL. */}
+          <Route path="demo" element={<Navigate to="/" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

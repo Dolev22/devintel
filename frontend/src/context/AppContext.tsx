@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { api, getToken, setToken } from "../lib/api";
+import { exitDemo, isDemo } from "../lib/demo";
 import type { Preferences, User } from "../lib/types";
 
 type Theme = "dark" | "light";
@@ -111,7 +112,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     async function restore() {
-      if (!getToken()) {
+      if (!getToken() && !isDemo()) {
         setLoading(false);
         return;
       }
@@ -119,7 +120,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const data = await api.get<{ user: User; preferences: Preferences }>("/api/auth/me");
         if (!cancelled) applySession(data.user, data.preferences);
       } catch {
-        setToken(null);
+        if (!isDemo()) setToken(null);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -156,7 +157,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(() => {
-    setToken(null);
+    // Leaving the demo returns to the real sign-in without touching a real session.
+    if (isDemo()) exitDemo();
+    else setToken(null);
     setUser(null);
     setPreferences(null);
   }, []);

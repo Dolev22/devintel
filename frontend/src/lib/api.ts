@@ -1,3 +1,5 @@
+import { DemoError, demoRequest, isDemo } from "./demo";
+
 const TOKEN_KEY = "devintel_token";
 
 export function getToken(): string | null {
@@ -27,6 +29,15 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  if (isDemo()) {
+    try {
+      return await demoRequest<T>(path, options);
+    } catch (err) {
+      if (err instanceof DemoError) throw new ApiError(err.message, err.status);
+      throw err;
+    }
+  }
+
   const token = getToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
